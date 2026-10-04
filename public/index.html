@@ -36,8 +36,8 @@
 
   <div class="flex justify-between items-center mb-4">
     <h1 class="text-base font-bold text-slate-100">💎 Salafan Nazorati</h1>
-    <span id="roleBadge" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
-      Yuklanmoqda...
+    <span id="roleBadge" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+      👑 Admin Rejimi
     </span>
   </div>
 
@@ -56,7 +56,7 @@
   <div class="glass-card p-4 rounded-2xl mb-4">
     <div class="flex justify-between items-center mb-3">
       <h3 class="text-xs font-bold text-blue-400 uppercase tracking-wider">👥 Hamkorlar Balansi</h3>
-      <button id="addContactBtn" onclick="toggleContactForm()" class="hidden px-3 py-1 bg-blue-600 hover:bg-blue-500 text-xs font-bold rounded-lg transition">
+      <button id="addContactBtn" onclick="toggleContactForm()" class="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-xs font-bold rounded-lg transition text-white">
         + Yangi Sex / Qarz
       </button>
     </div>
@@ -79,8 +79,8 @@
         <input type="number" id="initialDebt" placeholder="0" class="glass-input w-full p-2 text-xs rounded-lg font-bold text-red-400">
       </div>
       <div class="flex gap-2">
-        <button onclick="saveContact()" id="contactSaveBtn" class="w-full py-2 bg-emerald-600 text-xs font-bold rounded-lg">Saqlash</button>
-        <button onclick="cancelContactEdit()" id="contactCancelBtn" class="hidden w-1/3 py-2 bg-slate-700 text-xs font-bold rounded-lg">Bekor</button>
+        <button onclick="saveContact()" id="contactSaveBtn" class="w-full py-2 bg-emerald-600 text-xs font-bold rounded-lg text-white">Saqlash</button>
+        <button onclick="cancelContactEdit()" id="contactCancelBtn" class="hidden w-1/3 py-2 bg-slate-700 text-xs font-bold rounded-lg text-white">Bekor</button>
       </div>
     </div>
 
@@ -88,7 +88,7 @@
   </div>
 
   <!-- Operatsiya formasi -->
-  <div id="adminFormCard" class="hidden glass-card p-4 rounded-2xl mb-4">
+  <div id="adminFormCard" class="glass-card p-4 rounded-2xl mb-4">
     <h2 id="formTitle" class="text-sm font-bold text-blue-400 mb-3">📦 Yangi Operatsiya Kiritish</h2>
     
     <form id="mainForm">
@@ -150,7 +150,7 @@
   <div class="glass-card p-4 rounded-2xl">
     <div class="flex justify-between items-center mb-3">
       <h3 class="text-xs font-bold text-slate-200 uppercase">📋 Amaliyotlar Tarixi</h3>
-      <button onclick="copyForExcel()" class="px-2.5 py-1 bg-emerald-600 text-[10px] font-bold rounded-lg">Excel</button>
+      <button onclick="copyForExcel()" class="px-2.5 py-1 bg-emerald-600 text-[10px] font-bold rounded-lg text-white">Excel</button>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full text-left text-[11px]">
@@ -160,7 +160,7 @@
             <th class="py-2">Odam</th>
             <th class="py-2">O'lcham / Kg</th>
             <th class="py-2">Summa</th>
-            <th id="thActions" class="py-2 text-right hidden">Amal</th>
+            <th id="thActions" class="py-2 text-right">Amal</th>
           </tr>
         </thead>
         <tbody id="tableBody" class="divide-y divide-slate-800/50"></tbody>
@@ -172,10 +172,7 @@
     const tg = window.Telegram?.WebApp;
     if (tg) tg.expand();
 
-    const ADMIN_TELEGRAM_ID = "8081723573"; 
-    const currentUserId = String(tg?.initDataUnsafe?.user?.id || "");
-    const isAdmin = (currentUserId === ADMIN_TELEGRAM_ID || currentUserId === "");
-
+    // Firebase sozlamasi
     firebase.initializeApp({
       databaseURL: "https://hisob-kitob-daftar-default-rtdb.firebaseio.com/"
     });
@@ -186,19 +183,7 @@
     let historyData = {};
 
     function initInterface() {
-      const badge = document.getElementById('roleBadge');
-      if (isAdmin) {
-        if(badge) {
-          badge.innerText = "👑 Admin Rejimi";
-          badge.className = "px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30";
-        }
-        document.getElementById('adminFormCard')?.classList.remove('hidden');
-        document.getElementById('addContactBtn')?.classList.remove('hidden');
-        document.getElementById('thActions')?.classList.remove('hidden');
-      } else {
-        if(badge) badge.innerText = "👤 Yuk Beruvchi Paneli";
-      }
-
+      // Ma'lumotlarni Firebase'dan olish
       db.ref('contacts').on('value', (snapshot) => {
         contactsData = snapshot.val() || {};
         renderContacts();
@@ -291,10 +276,8 @@
           </div>
           <div class="text-right">
             <p class="text-xs font-bold ${balance > 0 ? 'text-red-400' : 'text-emerald-400'}">${balance.toLocaleString()} UZS</p>
-            ${isAdmin ? `
-              <button onclick="editContact('${id}')" class="text-[10px] text-blue-400 underline ml-2">✏️ tahrirlash</button>
-              <button onclick="deleteContact('${id}')" class="text-[10px] text-red-500 underline ml-2">🗑 o'chirish</button>
-            ` : ''}
+            <button onclick="editContact('${id}')" class="text-[10px] text-blue-400 underline ml-2">✏️ tahrirlash</button>
+            <button onclick="deleteContact('${id}')" class="text-[10px] text-red-500 underline ml-2">🗑 o'chirish</button>
           </div>
         `;
         list.appendChild(div);
@@ -318,7 +301,6 @@
     if (mainForm) {
       mainForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        if (!isAdmin) return alert("Sizda ruxsat yo'q!");
 
         const recordId = document.getElementById('recordId')?.value;
         const now = new Date();
@@ -416,23 +398,21 @@
           <td class="py-2 font-bold text-slate-200">${contactName}</td>
           <td class="py-2">${isPurchase ? `<span class="text-blue-400">${item.rollSize \vert{}\vert{} '-'} (${item.weightKg || 0}kg)</span>` : '<span class="text-emerald-400">💸 Naqd</span>'}</td>
           <td class="py-2 font-bold ${isPurchase ? 'text-red-400' : 'text-emerald-400'}">${(item.totalAmount || 0).toLocaleString()}</td>
-          ${isAdmin ? `
-            <td class="py-2 text-right">
-              <button onclick="editRecord('${id}')" class="text-blue-400 mr-1.5">✏️</button>
-              <button onclick="deleteRecord('${id}')" class="text-red-500">🗑</button>
-            </td>
-          ` : ''}
+          <td class="py-2 text-right">
+            <button onclick="editRecord('${id}')" class="text-blue-400 mr-1.5">✏️</button>
+            <button onclick="deleteRecord('${id}')" class="text-red-500">🗑</button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
     function deleteRecord(id) {
-      if (isAdmin && confirm("O'chirmoqchimisiz?")) db.ref('transactions/' + id).remove();
+      if (confirm("O'chirmoqchimisiz?")) db.ref('transactions/' + id).remove();
     }
 
     function deleteContact(id) {
-      if (isAdmin && confirm("Hamkorni o'chirmoqchimisiz?")) db.ref('contacts/' + id).remove();
+      if (confirm("Hamkorni o'chirmoqchimisiz?")) db.ref('contacts/' + id).remove();
     }
 
     function toggleContactForm() {
@@ -492,6 +472,7 @@
       navigator.clipboard.writeText(text).then(() => alert("✅ Nusxalandi!"));
     }
 
+    // Ishga tushirish
     initInterface();
   </script>
 </body>
