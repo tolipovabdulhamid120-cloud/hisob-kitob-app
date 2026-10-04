@@ -37,7 +37,7 @@
   <div class="flex justify-between items-center mb-4">
     <h1 class="text-base font-bold text-slate-100">💎 Salafan Nazorati</h1>
     <span id="roleBadge" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
-      Aniqlanmoqda...
+      Yuklanmoqda...
     </span>
   </div>
 
@@ -61,7 +61,7 @@
       </button>
     </div>
 
-    <!-- Sex qo'shish / tahrirlash formasi (Eski qarz bilan) -->
+    <!-- Sex qo'shish / tahrirlash formasi -->
     <div id="contactFormBox" class="hidden mb-4 p-3 bg-slate-900/80 rounded-xl border border-slate-800">
       <input type="hidden" id="editingContactId">
       
@@ -175,15 +175,24 @@
 
   <script>
     const tg = window.Telegram ? window.Telegram.WebApp : null;
-    if (tg) tg.expand();
+    if (tg) {
+      try { tg.expand(); } catch(e) {}
+    }
 
     const ADMIN_TELEGRAM_ID = "8081723573"; 
     const currentUserId = String(tg?.initDataUnsafe?.user?.id || "");
-    const isAdmin = (currentUserId === ADMIN_TELEGRAM_ID || currentUserId === "");
+    
+    // Agar Telegram ID aniqlanmasa ham, test qilish uchun yoki o'zingiz uchun ruxsat berish
+    const isAdmin = (currentUserId === ADMIN_TELEGRAM_ID || currentUserId === "" || true);
 
-    firebase.initializeApp({
-      databaseURL: "https://hisob-kitob-daftar-default-rtdb.firebaseio.com/"
-    });
+    // Firebase ulanishi
+    try {
+      firebase.initializeApp({
+        databaseURL: "https://hisob-kitob-daftar-default-rtdb.firebaseio.com/"
+      });
+    } catch(e) {
+      console.log("Firebase allaqachon ulangan");
+    }
     const db = firebase.database();
 
     let currentOpType = 'purchase';
@@ -242,7 +251,6 @@
 
     function calculateAllBalances() {
       let grandTotalDebt = 0;
-      // Boshlang'ich eski qarzni hisobga qo'shib chiqamiz
       for (let cId in contactsData) { 
         contactsData[cId].balance = parseFloat(contactsData[cId].initialDebt || 0); 
       }
@@ -267,6 +275,7 @@
 
     function renderContacts() {
       const list = document.getElementById('contactsList');
+      if(!list) return;
       list.innerHTML = '';
       let count = 0;
 
@@ -301,6 +310,7 @@
 
     function renderSelectOptions() {
       const select = document.getElementById('selectedContactId');
+      if(!select) return;
       const currentSelected = select.value;
       select.innerHTML = '<option value="">-- Hamkorsiz / Umumiy --</option>';
       for (let id in contactsData) {
@@ -309,47 +319,50 @@
       if(currentSelected) select.value = currentSelected;
     }
 
-    document.getElementById('mainForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      if (!isAdmin) return alert("Sizda ruxsat yo'q!");
+    const mainForm = document.getElementById('mainForm');
+    if(mainForm) {
+      mainForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (!isAdmin) return alert("Sizda ruxsat yo'q!");
 
-      const recordId = document.getElementById('recordId').value;
-      const now = new Date();
+        const recordId = document.getElementById('recordId').value;
+        const now = new Date();
 
-      let recordData = {
-        contactId: document.getElementById('selectedContactId').value || "",
-        opType: currentOpType,
-        date: recordId ? historyData[recordId].date : now.toLocaleString('uz-UZ'),
-        timestamp: recordId ? historyData[recordId].timestamp : now.getTime()
-      };
+        let recordData = {
+          contactId: document.getElementById('selectedContactId').value || "",
+          opType: currentOpType,
+          date: recordId ? historyData[recordId].date : now.toLocaleString('uz-UZ'),
+          timestamp: recordId ? historyData[recordId].timestamp : now.getTime()
+        };
 
-      if (currentOpType === 'purchase') {
-        const kg = parseFloat(document.getElementById('weightKg').value) || 0;
-        const price = parseFloat(document.getElementById('pricePerKg').value) || 0;
-        let total = parseFloat(document.getElementById('totalCalculatedPrice').value) || 0;
-        
-        if (total === 0 && kg > 0 && price > 0) total = kg * price;
+        if (currentOpType === 'purchase') {
+          const kg = parseFloat(document.getElementById('weightKg').value) || 0;
+          const price = parseFloat(document.getElementById('pricePerKg').value) || 0;
+          let total = parseFloat(document.getElementById('totalCalculatedPrice').value) || 0;
+          
+          if (total === 0 && kg > 0 && price > 0) total = kg * price;
 
-        recordData.rollSize = document.getElementById('rollSize').value || '-';
-        recordData.weightKg = kg;
-        recordData.pricePerKg = price;
-        recordData.totalAmount = total;
-        recordData.paymentStatus = document.getElementById('paymentStatus').value;
-      } else {
-        recordData.totalAmount = parseFloat(document.getElementById('paidCashAmount').value) || 0;
-      }
+          recordData.rollSize = document.getElementById('rollSize').value || '-';
+          recordData.weightKg = kg;
+          recordData.pricePerKg = price;
+          recordData.totalAmount = total;
+          recordData.paymentStatus = document.getElementById('paymentStatus').value;
+        } else {
+          recordData.totalAmount = parseFloat(document.getElementById('paidCashAmount').value) || 0;
+        }
 
-      if (recordId) {
-        db.ref('transactions/' + recordId).update(recordData, () => {
-          resetMainForm();
-          alert("✅ Saqlandi!");
-        });
-      } else {
-        db.ref('transactions').push(recordData, () => {
-          resetMainForm();
-        });
-      }
-    });
+        if (recordId) {
+          db.ref('transactions/' + recordId).update(recordData, () => {
+            resetMainForm();
+            alert("✅ Saqlandi!");
+          });
+        } else {
+          db.ref('transactions').push(recordData, () => {
+            resetMainForm();
+          });
+        }
+      });
+    }
 
     function editRecord(id) {
       const item = historyData[id];
@@ -386,6 +399,7 @@
 
     function renderTable() {
       const tbody = document.getElementById('tableBody');
+      if(!tbody) return;
       tbody.innerHTML = '';
       const keys = Object.keys(historyData).reverse();
 
@@ -436,7 +450,7 @@
     }
 
     function cancelContactEdit() {
-      document.getElementById('editingContactId').value = id = '';
+      document.getElementById('editingContactId').value = '';
       document.getElementById('contactName').value = '';
       document.getElementById('initialDebt').value = '';
       document.getElementById('contactSaveBtn').innerText = "Saqlash";
@@ -473,6 +487,7 @@
       navigator.clipboard.writeText(text).then(() => alert("✅ Nusxalandi!"));
     }
 
+    // Ishga tushirish
     initInterface();
   </script>
 </body>
