@@ -36,8 +36,8 @@
 
   <div class="flex justify-between items-center mb-4">
     <h1 class="text-base font-bold text-slate-100">💎 Salafan Nazorati</h1>
-    <span id="roleBadge" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
-      Yuklanmoqda...
+    <span id="roleBadge" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+      👑 Admin Rejimi
     </span>
   </div>
 
@@ -56,12 +56,12 @@
   <div class="glass-card p-4 rounded-2xl mb-4">
     <div class="flex justify-between items-center mb-3">
       <h3 class="text-xs font-bold text-blue-400 uppercase tracking-wider">👥 Hamkorlar Balansi</h3>
-      <button id="addContactBtn" onclick="toggleContactForm()" class="hidden px-3 py-1 bg-blue-600 hover:bg-blue-500 text-xs font-bold rounded-lg transition text-white">
+      <button id="addContactBtn" onclick="toggleContactForm()" class="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-xs font-bold rounded-lg transition text-white">
         + Yangi Sex / Qarz
       </button>
     </div>
 
-    <!-- Sex qo'shish / tahrirlash formasi (Eski qarz bilan) -->
+    <!-- Sex qo'shish / tahrirlash formasi -->
     <div id="contactFormBox" class="hidden mb-4 p-3 bg-slate-900/80 rounded-xl border border-slate-800">
       <input type="hidden" id="editingContactId">
       
@@ -93,7 +93,7 @@
   </div>
 
   <!-- OPERATSIYA KIRITISH -->
-  <div id="adminFormCard" class="hidden glass-card p-4 rounded-2xl mb-4">
+  <div id="adminFormCard" class="glass-card p-4 rounded-2xl mb-4">
     <h2 id="formTitle" class="text-sm font-bold text-blue-400 mb-3">📦 Yangi Operatsiya Kiritish</h2>
     
     <form id="mainForm">
@@ -165,7 +165,7 @@
             <th class="py-2">Odam</th>
             <th class="py-2">O'lcham / Kg</th>
             <th class="py-2">Summa</th>
-            <th id="thActions" class="py-2 text-right hidden">Amal</th>
+            <th class="py-2 text-right">Amal</th>
           </tr>
         </thead>
         <tbody id="tableBody" class="divide-y divide-slate-800/50"></tbody>
@@ -174,16 +174,24 @@
   </div>
 
   <script>
-    const tg = window.Telegram ? window.Telegram.WebApp : null;
-    if (tg) { try { tg.expand(); } catch(e) {} }
+    // Telegram WebApp xavfsiz ishga tushirish
+    try {
+      const tg = window.Telegram ? window.Telegram.WebApp : null;
+      if (tg) { tg.expand(); }
+    } catch (e) {
+      console.log("Telegram WebApp xatosi:", e);
+    }
 
-    const ADMIN_TELEGRAM_ID = "8081723573"; 
-    const currentUserId = String(tg?.initDataUnsafe?.user?.id || "");
-    const isAdmin = (currentUserId === ADMIN_TELEGRAM_ID || currentUserId === "");
-
-    firebase.initializeApp({
-      databaseURL: "https://hisob-kitob-daftar-default-rtdb.firebaseio.com/"
-    });
+    // Firebase ulanishi
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp({
+          databaseURL: "https://hisob-kitob-daftar-default-rtdb.firebaseio.com/"
+        });
+      }
+    } catch (e) {
+      console.log("Firebase xatosi:", e);
+    }
     const db = firebase.database();
 
     let currentOpType = 'purchase';
@@ -191,17 +199,6 @@
     let historyData = {};
 
     function initInterface() {
-      const badge = document.getElementById('roleBadge');
-      if (isAdmin) {
-        badge.innerText = "👑 Admin Rejimi";
-        badge.className = "px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30";
-        document.getElementById('adminFormCard').classList.remove('hidden');
-        document.getElementById('addContactBtn').classList.remove('hidden');
-        document.getElementById('thActions').classList.remove('hidden');
-      } else {
-        badge.innerText = "👤 Yuk Beruvchi Paneli";
-      }
-
       db.ref('contacts').on('value', (snapshot) => {
         contactsData = snapshot.val() || {};
         renderContacts();
@@ -257,7 +254,8 @@
       for (let cId in contactsData) {
         grandTotalDebt += contactsData[cId].balance || 0;
       }
-      document.getElementById('totalDebtSum').innerText = grandTotalDebt.toLocaleString() + " UZS";
+      const totalDebtEl = document.getElementById('totalDebtSum');
+      if (totalDebtEl) totalDebtEl.innerText = grandTotalDebt.toLocaleString() + " UZS";
       renderContacts();
     }
 
@@ -285,15 +283,14 @@
           </div>
           <div class="text-right">
             <p class="text-xs font-bold ${balance > 0 ? 'text-red-400' : 'text-emerald-400'}">${balance.toLocaleString()} UZS</p>
-            ${isAdmin ? `
-              <button onclick="editContact('${id}')" class="text-[10px] text-blue-400 underline ml-2">✏️ tahrirlash</button>
-              <button onclick="deleteContact('${id}')" class="text-[10px] text-red-500 underline ml-2">🗑 o'chirish</button>
-            ` : ''}
+            <button onclick="editContact('${id}')" class="text-[10px] text-blue-400 underline ml-2">✏️ tahrirlash</button>
+            <button onclick="deleteContact('${id}')" class="text-[10px] text-red-500 underline ml-2">🗑 o'chirish</button>
           </div>
         `;
         list.appendChild(div);
       }
-      document.getElementById('suppliersCount').innerText = count + " ta";
+      const supCountEl = document.getElementById('suppliersCount');
+      if (supCountEl) supCountEl.innerText = count + " ta";
     }
 
     function renderSelectOptions() {
@@ -311,7 +308,6 @@
     if(mainForm) {
       mainForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        if (!isAdmin) return alert("Sizda ruxsat yo'q!");
 
         const contactId = document.getElementById('selectedContactId').value;
         if(!contactId) return alert("Iltimos, hamkorni tanlang!");
@@ -401,23 +397,21 @@
           <td class="py-2 font-bold text-slate-200">${contactName}</td>
           <td class="py-2">${isPurchase ? `<span class="text-blue-400">${item.rollSize \vert{}\vert{} '-'} (${item.weightKg || 0}kg)</span>` : '<span class="text-emerald-400">💸 Naqd</span>'}</td>
           <td class="py-2 font-bold ${isPurchase ? 'text-red-400' : 'text-emerald-400'}">${(item.totalAmount || 0).toLocaleString()}</td>
-          ${isAdmin ? `
-            <td class="py-2 text-right">
-              <button onclick="editRecord('${id}')" class="text-blue-400 mr-1.5">✏️</button>
-              <button onclick="deleteRecord('${id}')" class="text-red-500">🗑</button>
-            </td>
-          ` : ''}
+          <td class="py-2 text-right">
+            <button onclick="editRecord('${id}')" class="text-blue-400 mr-1.5">✏️</button>
+            <button onclick="deleteRecord('${id}')" class="text-red-500">🗑</button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
     function deleteRecord(id) {
-      if (isAdmin && confirm("O'chirmoqchimisiz?")) db.ref('transactions/' + id).remove();
+      if (confirm("O'chirmoqchimisiz?")) db.ref('transactions/' + id).remove();
     }
 
     function deleteContact(id) {
-      if (isAdmin && confirm("Hamkorni o'chirmoqchimisiz?")) db.ref('contacts/' + id).remove();
+      if (confirm("Hamkorni o'chirmoqchimisiz?")) db.ref('contacts/' + id).remove();
     }
 
     function toggleContactForm() {
@@ -476,6 +470,7 @@
       navigator.clipboard.writeText(text).then(() => alert("✅ Nusxalandi!"));
     }
 
+    // Ishga tushirish
     initInterface();
   </script>
 </body>
