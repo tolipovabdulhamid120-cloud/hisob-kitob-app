@@ -5,9 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Salafan Sex - Hisob-Kitob Daftari</title>
   
+  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Firebase v8 SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
@@ -34,10 +37,11 @@
 </head>
 <body class="p-3 pb-20">
 
+  <!-- ROL INDIKATORI VA YUQORI KARTALAR -->
   <div class="flex justify-between items-center mb-4">
     <h1 class="text-base font-bold text-slate-100">💎 Salafan Nazorati</h1>
-    <span id="roleBadge" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
-      👑 Faol Rejim
+    <span id="roleBadge" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+      Aniqlanmoqda...
     </span>
   </div>
 
@@ -47,21 +51,21 @@
       <h2 id="totalDebtSum" class="text-lg font-bold text-red-500 mt-1">0 UZS</h2>
     </div>
     <div class="glass-card p-4 rounded-2xl">
-      <p class="text-xs text-slate-400 font-medium">Hamkorlar</p>
+      <p class="text-xs text-slate-400 font-medium">Yuk Beruvchilar</p>
       <h2 id="suppliersCount" class="text-lg font-bold text-emerald-400 mt-1">0 ta</h2>
     </div>
   </div>
 
-  <!-- HAMKORLAR BO'LIMI -->
+  <!-- YUK BERUVCHILAR BO'LIMI -->
   <div class="glass-card p-4 rounded-2xl mb-4">
     <div class="flex justify-between items-center mb-3">
       <h3 class="text-xs font-bold text-blue-400 uppercase tracking-wider">👥 Hamkorlar Balansi</h3>
-      <button id="addContactBtn" onclick="toggleContactForm()" class="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-xs font-bold rounded-lg transition text-white">
-        + Yangi Hamkor / Qarz
+      <button id="addContactBtn" onclick="toggleContactForm()" class="hidden px-3 py-1 bg-blue-600 hover:bg-blue-500 text-xs font-bold rounded-lg transition">
+        + Yangi Sex
       </button>
     </div>
 
-    <!-- Sex / Hamkor qo'shish formasi -->
+    <!-- Sex qo'shish / tahrirlash formasi -->
     <div id="contactFormBox" class="hidden mb-4 p-3 bg-slate-900/80 rounded-xl border border-slate-800">
       <input type="hidden" id="editingContactId">
       
@@ -79,41 +83,49 @@
       </div>
 
       <div class="mb-3">
-        <label class="text-[10px] text-slate-400 mb-1 block">Boshlang'ich Eski Qarz (UZS):</label>
+        <label class="text-[10px] text-slate-400 mb-1 block">Boshlang'ich Eski Qarz (Agar bo'lsa):</label>
         <input type="number" id="initialDebt" placeholder="0" class="glass-input w-full p-2 text-xs rounded-lg font-bold text-red-400">
       </div>
 
       <div class="flex gap-2">
-        <button onclick="saveContact()" id="contactSaveBtn" class="w-full py-2 bg-emerald-600 text-xs font-bold rounded-lg text-white">Saqlash</button>
-        <button onclick="cancelContactEdit()" id="contactCancelBtn" class="hidden w-1/3 py-2 bg-slate-700 text-xs font-bold rounded-lg text-white">Bekor</button>
+        <button onclick="saveContact()" id="contactSaveBtn" class="w-full py-2 bg-emerald-600 text-xs font-bold rounded-lg">Saqlash</button>
+        <button onclick="cancelContactEdit()" id="contactCancelBtn" class="hidden w-1/3 py-2 bg-slate-700 text-xs font-bold rounded-lg">Bekor qilish</button>
       </div>
     </div>
 
+    <!-- Odamlar ro'yxati -->
     <div id="contactsList" class="space-y-2"></div>
   </div>
 
-  <!-- OPERATSIYA KIRITISH -->
-  <div id="adminFormCard" class="glass-card p-4 rounded-2xl mb-4">
+  <!-- OPERATSIYA KIRITISH / TAHRIRLASH FORMASI (Admin uchun) -->
+  <div id="adminFormCard" class="hidden glass-card p-4 rounded-2xl mb-4">
     <h2 id="formTitle" class="text-sm font-bold text-blue-400 mb-3">📦 Yangi Operatsiya Kiritish</h2>
     
     <form id="mainForm">
       <input type="hidden" id="recordId">
 
       <div class="grid grid-cols-2 gap-2 mb-3">
-        <button type="button" id="btnTypePurchase" onclick="setOpType('purchase')" class="py-2 text-xs font-bold rounded-xl bg-blue-600 text-white">📦 Yuk Olish</button>
-        <button type="button" id="btnTypePayment" onclick="setOpType('payment')" class="py-2 text-xs font-bold rounded-xl bg-slate-800 text-slate-400">💸 Naqd Pul Berish</button>
+        <button type="button" id="btnTypePurchase" onclick="setOpType('purchase')" class="py-2 text-xs font-bold rounded-xl bg-blue-600 text-white">
+          📦 Yuk Olish
+        </button>
+        <button type="button" id="btnTypePayment" onclick="setOpType('payment')" class="py-2 text-xs font-bold rounded-xl bg-slate-800 text-slate-400">
+          💸 Naqd Pul Berish
+        </button>
       </div>
 
       <div class="mb-3">
         <label class="text-xs text-slate-400 mb-1 block">Hamkorni tanlang:</label>
-        <select id="selectedContactId" required class="glass-input w-full p-2.5 text-xs rounded-xl"></select>
+        <select id="selectedContactId" required class="glass-input w-full p-2.5 text-xs rounded-xl">
+        </select>
       </div>
 
+      <!-- Yuk Olish -->
       <div id="purchaseFields" class="space-y-3">
         <div>
           <label class="text-xs text-slate-400 mb-1 block">Rulon o'lchami:</label>
           <input type="text" id="rollSize" placeholder="Masalan: 40x60" class="glass-input w-full p-2.5 text-xs rounded-xl">
         </div>
+        
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="text-xs text-slate-400 mb-1 block">Kilogramm (kg):</label>
@@ -124,10 +136,12 @@
             <input type="number" id="pricePerKg" oninput="calculateTotal()" placeholder="0" class="glass-input w-full p-2.5 text-xs rounded-xl">
           </div>
         </div>
+
         <div>
-          <label class="text-xs text-slate-400 mb-1 block">Jami Yuk Summasi:</label>
+          <label class="text-xs text-slate-400 mb-1 block">Jami Yuk Summasi (Avto):</label>
           <input type="number" id="totalCalculatedPrice" placeholder="0" readonly class="glass-input w-full p-2.5 text-xs rounded-xl font-bold text-amber-400 bg-slate-900/50">
         </div>
+
         <div>
           <label class="text-xs text-slate-400 mb-1 block">To'lov shakli:</label>
           <select id="paymentStatus" class="glass-input w-full p-2.5 text-xs rounded-xl">
@@ -137,6 +151,7 @@
         </div>
       </div>
 
+      <!-- Naqd Pul Berish -->
       <div id="paymentFields" class="hidden space-y-3">
         <div>
           <label class="text-xs text-slate-400 mb-1 block">Berilgan Naqd Pul Summasi (UZS):</label>
@@ -145,18 +160,25 @@
       </div>
 
       <div class="flex gap-2 mt-4">
-        <button type="submit" id="saveBtn" class="w-full py-3 bg-blue-600 text-white font-bold text-xs rounded-xl">Saqlash</button>
-        <button type="button" id="cancelBtn" onclick="resetMainForm()" class="hidden w-1/3 py-3 bg-slate-700 text-white font-bold text-xs rounded-xl">Bekor</button>
+        <button type="submit" id="saveBtn" class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs rounded-xl shadow-lg">
+          Saqlash (Sana Avto Yoziladi)
+        </button>
+        <button type="button" id="cancelBtn" onclick="resetMainForm()" class="hidden w-1/3 py-3 bg-slate-700 text-white font-bold text-xs rounded-xl">
+          Bekor
+        </button>
       </div>
     </form>
   </div>
 
-  <!-- JADVAL -->
+  <!-- JADVAL: BARCHA AMALIYOTLAR TARIXI -->
   <div class="glass-card p-4 rounded-2xl">
     <div class="flex justify-between items-center mb-3">
       <h3 class="text-xs font-bold text-slate-200 uppercase">📋 Amaliyotlar Tarixi</h3>
-      <button onclick="copyForExcel()" class="px-2.5 py-1 bg-emerald-600 text-[10px] font-bold rounded-lg text-white">Excel</button>
+      <button onclick="copyForExcel()" class="px-2.5 py-1 bg-emerald-600 text-[10px] font-bold rounded-lg">
+        📋 Excel
+      </button>
     </div>
+
     <div class="overflow-x-auto">
       <table class="w-full text-left text-[11px]">
         <thead>
@@ -165,303 +187,45 @@
             <th class="py-2">Odam</th>
             <th class="py-2">O'lcham / Kg</th>
             <th class="py-2">Summa</th>
-            <th class="py-2 text-right">Amal</th>
+            <th id="thActions" class="py-2 text-right hidden">Amal</th>
           </tr>
         </thead>
-        <tbody id="tableBody" class="divide-y divide-slate-800/50"></tbody>
+        <tbody id="tableBody" class="divide-y divide-slate-800/50">
+        </tbody>
       </table>
     </div>
   </div>
 
   <script>
-    // Sahifa to'liq yuklangandan so'ng ishga tushirish
-    document.addEventListener("DOMContentLoaded", function() {
-      try {
-        const tg = window.Telegram ? window.Telegram.WebApp : null;
-        if (tg) { tg.expand(); }
-      } catch (e) {
-        console.error("Telegram WebApp xatosi:", e);
+    const tg = window.Telegram ? window.Telegram.WebApp : null;
+    if (tg) tg.expand();
+
+    const ADMIN_TELEGRAM_ID = "8081723573"; 
+    
+    const currentUserId = String(tg?.initDataUnsafe?.user?.id || "");
+    const isAdmin = (currentUserId === ADMIN_TELEGRAM_ID || currentUserId === "");
+
+    firebase.initializeApp({
+      databaseURL: "https://hisob-kitob-daftar-default-rtdb.firebaseio.com/"
+    });
+    const db = firebase.database();
+
+    let currentOpType = 'purchase';
+    let contactsData = {};
+    let historyData = {};
+
+    function initInterface() {
+      const badge = document.getElementById('roleBadge');
+      if (isAdmin) {
+        badge.innerText = "👑 Admin Rejimi";
+        badge.className = "px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30";
+        document.getElementById('adminFormCard').classList.remove('hidden');
+        document.getElementById('addContactBtn').classList.remove('hidden');
+        document.getElementById('thActions').classList.remove('hidden');
+      } else {
+        badge.innerText = "👤 Yuk Beruvchi Paneli";
       }
 
-      try {
-        if (!firebase.apps.length) {
-          firebase.initializeApp({
-            databaseURL: "https://hisob-kitob-daftar-default-rtdb.firebaseio.com/"
-          });
-        }
-      } catch (e) {
-        console.error("Firebase xatosi:", e);
-      }
-
-      const db = firebase.database();
-      let currentOpType = 'purchase';
-      let contactsData = {};
-      let historyData = {};
-
-      window.setOpType = function(type) {
-        currentOpType = type;
-        const pFields = document.getElementById('purchaseFields');
-        const payFields = document.getElementById('paymentFields');
-        const btnPur = document.getElementById('btnTypePurchase');
-        const btnPay = document.getElementById('btnTypePayment');
-
-        if (type === 'purchase') {
-          pFields.classList.remove('hidden');
-          payFields.classList.add('hidden');
-          btnPur.className = "py-2 text-xs font-bold rounded-xl bg-blue-600 text-white";
-          btnPay.className = "py-2 text-xs font-bold rounded-xl bg-slate-800 text-slate-400";
-        } else {
-          pFields.classList.add('hidden');
-          payFields.classList.remove('hidden');
-          btnPur.className = "py-2 text-xs font-bold rounded-xl bg-slate-800 text-slate-400";
-          btnPay.className = "py-2 text-xs font-bold rounded-xl bg-emerald-600 text-white";
-        }
-      };
-
-      window.calculateTotal = function() {
-        const kg = parseFloat(document.getElementById('weightKg').value) || 0;
-        const price = parseFloat(document.getElementById('pricePerKg').value) || 0;
-        document.getElementById('totalCalculatedPrice').value = Math.round(kg * price);
-      };
-
-      function calculateAllBalances() {
-        let grandTotalDebt = 0;
-        for (let cId in contactsData) { 
-          contactsData[cId].balance = parseFloat(contactsData[cId].initialDebt || 0); 
-        }
-
-        for (let tId in historyData) {
-          const item = historyData[tId];
-          if (item && item.contactId && contactsData[item.contactId]) {
-            if (item.opType === 'purchase' && item.paymentStatus === 'credit') {
-              contactsData[item.contactId].balance += (item.totalAmount || 0);
-            } else if (item.opType === 'payment') {
-              contactsData[item.contactId].balance -= (item.totalAmount || 0);
-            }
-          }
-        }
-
-        for (let cId in contactsData) {
-          grandTotalDebt += contactsData[cId].balance || 0;
-        }
-        
-        const totalDebtEl = document.getElementById('totalDebtSum');
-        if (totalDebtEl) totalDebtEl.innerText = grandTotalDebt.toLocaleString() + " UZS";
-        renderContacts();
-      }
-
-      function renderContacts() {
-        const list = document.getElementById('contactsList');
-        if(!list) return;
-        list.innerHTML = '';
-        let count = 0;
-
-        for (let id in contactsData) {
-          count++;
-          const c = contactsData[id];
-          const balance = c.balance || 0;
-          const initDebt = parseFloat(c.initialDebt || 0);
-          
-          const div = document.createElement('div');
-          div.className = "flex justify-between items-center p-2.5 bg-slate-900/60 rounded-xl border border-slate-800/80";
-          div.innerHTML = `
-            <div>
-              <p class="font-bold text-xs text-slate-200">${c.name || 'Nomsiz'}</p>
-              <p class="text-[10px] text-slate-400">
-                ${c.type === 'supplier' ? 'Sex' : 'Xaridor'} 
-                ${initDebt > 0 ? `<span class="text-amber-400 ml-1">(Eski qarz: ${initDebt.toLocaleString()})</span>` : ''}
-              </p>
-            </div>
-            <div class="text-right">
-              <p class="text-xs font-bold ${balance > 0 ? 'text-red-400' : 'text-emerald-400'}">${balance.toLocaleString()} UZS</p>
-              <button onclick="editContact('${id}')" class="text-[10px] text-blue-400 underline ml-2">✏️ tahrir</button>
-              <button onclick="deleteContact('${id}')" class="text-[10px] text-red-500 underline ml-2">🗑 o'chirish</button>
-            </div>
-          `;
-          list.appendChild(div);
-        }
-        const supCountEl = document.getElementById('suppliersCount');
-        if (supCountEl) supCountEl.innerText = count + " ta";
-      }
-
-      function renderSelectOptions() {
-        const select = document.getElementById('selectedContactId');
-        if(!select) return;
-        const currentSelected = select.value;
-        select.innerHTML = '<option value="">-- Hamkorni tanlang --</option>';
-        for (let id in contactsData) {
-          select.innerHTML += `<option value="${id}">${contactsData[id].name || 'Nomsiz'}</option>`;
-        }
-        if(currentSelected) select.value = currentSelected;
-      }
-
-      const mainForm = document.getElementById('mainForm');
-      if(mainForm) {
-        mainForm.addEventListener('submit', function(e) {
-          e.preventDefault();
-
-          const contactId = document.getElementById('selectedContactId').value;
-          if(!contactId) return alert("Iltimos, hamkorni tanlang!");
-
-          const recordId = document.getElementById('recordId').value;
-          const now = new Date();
-
-          let recordData = {
-            contactId: contactId,
-            opType: currentOpType,
-            date: recordId ? historyData[recordId].date : now.toLocaleString('uz-UZ'),
-            timestamp: recordId ? historyData[recordId].timestamp : now.getTime()
-          };
-
-          if (currentOpType === 'purchase') {
-            const kg = parseFloat(document.getElementById('weightKg').value) || 0;
-            const price = parseFloat(document.getElementById('pricePerKg').value) || 0;
-            recordData.rollSize = document.getElementById('rollSize').value || '-';
-            recordData.weightKg = kg;
-            recordData.pricePerKg = price;
-            recordData.totalAmount = kg * price;
-            recordData.paymentStatus = document.getElementById('paymentStatus').value;
-          } else {
-            recordData.totalAmount = parseFloat(document.getElementById('paidCashAmount').value) || 0;
-          }
-
-          if (recordId) {
-            db.ref('transactions/' + recordId).update(recordData, () => {
-              window.resetMainForm();
-              alert("✅ O'zgarishlar saqlandi!");
-            });
-          } else {
-            db.ref('transactions').push(recordData, () => {
-              window.resetMainForm();
-            });
-          }
-        });
-      }
-
-      window.editRecord = function(id) {
-        const item = historyData[id];
-        if (!item) return;
-
-        document.getElementById('recordId').value = id;
-        document.getElementById('formTitle').innerText = "✏️ Tahrirlash";
-        document.getElementById('saveBtn').innerText = "Yangilash";
-        document.getElementById('cancelBtn').classList.remove('hidden');
-
-        document.getElementById('selectedContactId').value = item.contactId || "";
-        window.setOpType(item.opType);
-
-        if (item.opType === 'purchase') {
-          document.getElementById('rollSize').value = item.rollSize || '';
-          document.getElementById('weightKg').value = item.weightKg || '';
-          document.getElementById('pricePerKg').value = item.pricePerKg || '';
-          document.getElementById('totalCalculatedPrice').value = item.totalAmount || 0;
-          document.getElementById('paymentStatus').value = item.paymentStatus || 'credit';
-        } else {
-          document.getElementById('paidCashAmount').value = item.totalAmount || '';
-        }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      };
-
-      window.resetMainForm = function() {
-        document.getElementById('mainForm').reset();
-        document.getElementById('recordId').value = '';
-        document.getElementById('formTitle').innerText = "📦 Yangi Operatsiya Kiritish";
-        document.getElementById('saveBtn').innerText = "Saqlash";
-        document.getElementById('cancelBtn').classList.add('hidden');
-        window.setOpType('purchase');
-      };
-
-      function renderTable() {
-        const tbody = document.getElementById('tableBody');
-        if(!tbody) return;
-        tbody.innerHTML = '';
-        const keys = Object.keys(historyData).reverse();
-
-        keys.forEach(id => {
-          const item = historyData[id];
-          const contactName = (item.contactId && contactsData[item.contactId]) ? contactsData[item.contactId].name : 'O\'chirilgan';
-          const isPurchase = item.opType === 'purchase';
-
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td class="py-2 text-slate-400">${item.date ? item.date.split(',')[0] : ''}</td>
-            <td class="py-2 font-bold text-slate-200">${contactName}</td>
-            <td class="py-2">${isPurchase ? `<span class="text-blue-400">${item.rollSize \vert{}\vert{} '-'} (${item.weightKg || 0}kg)</span>` : '<span class="text-emerald-400">💸 Naqd</span>'}</td>
-            <td class="py-2 font-bold ${isPurchase ? 'text-red-400' : 'text-emerald-400'}">${(item.totalAmount || 0).toLocaleString()}</td>
-            <td class="py-2 text-right">
-              <button onclick="editRecord('${id}')" class="text-blue-400 mr-1.5">✏️</button>
-              <button onclick="deleteRecord('${id}')" class="text-red-500">🗑</button>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
-      }
-
-      window.deleteRecord = function(id) {
-        if (confirm("Ushbu yozuvni o'chirmoqchimisiz?")) db.ref('transactions/' + id).remove();
-      };
-
-      window.deleteContact = function(id) {
-        if (confirm("Hamkorni o'chirmoqchimisiz?")) db.ref('contacts/' + id).remove();
-      };
-
-      window.toggleContactForm = function() {
-        document.getElementById('contactFormBox').classList.toggle('hidden');
-      };
-
-      window.editContact = function(id) {
-        const c = contactsData[id];
-        if (!c) return;
-        document.getElementById('editingContactId').value = id;
-        document.getElementById('contactName').value = c.name || '';
-        document.getElementById('contactType').value = c.type || 'supplier';
-        document.getElementById('initialDebt').value = c.initialDebt || '';
-        document.getElementById('contactSaveBtn').innerText = "Yangilash";
-        document.getElementById('contactCancelBtn').classList.remove('hidden');
-        document.getElementById('contactFormBox').classList.remove('hidden');
-      };
-
-      window.cancelContactEdit = function() {
-        document.getElementById('editingContactId').value = '';
-        document.getElementById('contactName').value = '';
-        document.getElementById('initialDebt').value = '';
-        document.getElementById('contactSaveBtn').innerText = "Saqlash";
-        document.getElementById('contactCancelBtn').classList.add('hidden');
-        window.toggleContactForm();
-      };
-
-      window.saveContact = function() {
-        const id = document.getElementById('editingContactId').value;
-        const name = document.getElementById('contactName').value.trim();
-        const type = document.getElementById('contactType').value;
-        const initialDebt = parseFloat(document.getElementById('initialDebt').value) || 0;
-
-        if (!name) return alert("Iltimos, ism yoki sex nomini kiriting!");
-
-        const contactData = { name, type, initialDebt };
-
-        if (id) {
-          db.ref('contacts/' + id).update(contactData, () => window.cancelContactEdit());
-        } else {
-          db.ref('contacts').push(contactData, () => {
-            document.getElementById('contactName').value = '';
-            document.getElementById('initialDebt').value = '';
-            window.toggleContactForm();
-          });
-        }
-      };
-
-      window.copyForExcel = function() {
-        let text = "Sana\tHamkor\tOperatsiya\tO'lcham/Kg\tSumma\n";
-        for (let id in historyData) {
-          const item = historyData[id];
-          const name = (item.contactId && contactsData[item.contactId]) ? contactsData[item.contactId].name : '-';
-          text += `${item.date}\t${name}\t${item.opType}\t${item.rollSize || '-'}\t${item.totalAmount}\n`;
-        }
-        navigator.clipboard.writeText(text).then(() => alert("✅ Excel uchun nusxalandi!"));
-      };
-
-      // Ma'lumotlarni tinglashni boshlash
       db.ref('contacts').on('value', (snapshot) => {
         contactsData = snapshot.val() || {};
         renderContacts();
@@ -474,7 +238,270 @@
         renderTable();
         calculateAllBalances();
       });
+    }
+
+    function setOpType(type) {
+      currentOpType = type;
+      if (type === 'purchase') {
+        document.getElementById('purchaseFields').classList.remove('hidden');
+        document.getElementById('paymentFields').classList.add('hidden');
+        document.getElementById('btnTypePurchase').className = "py-2 text-xs font-bold rounded-xl bg-blue-600 text-white";
+        document.getElementById('btnTypePayment').className = "py-2 text-xs font-bold rounded-xl bg-slate-800 text-slate-400";
+      } else {
+        document.getElementById('purchaseFields').classList.add('hidden');
+        document.getElementById('paymentFields').classList.remove('hidden');
+        document.getElementById('btnTypePurchase').className = "py-2 text-xs font-bold rounded-xl bg-slate-800 text-slate-400";
+        document.getElementById('btnTypePayment').className = "py-2 text-xs font-bold rounded-xl bg-emerald-600 text-white";
+      }
+    }
+
+    function calculateTotal() {
+      const kg = parseFloat(document.getElementById('weightKg').value) || 0;
+      const price = parseFloat(document.getElementById('pricePerKg').value) || 0;
+      document.getElementById('totalCalculatedPrice').value = Math.round(kg * price);
+    }
+
+    function calculateAllBalances() {
+      let grandTotalDebt = 0;
+      
+      // Har bir hamkorning balansini boshlang'ich qarzi bilan boshlaymiz
+      for (let cId in contactsData) { 
+        contactsData[cId].balance = parseFloat(contactsData[cId].initialDebt || 0); 
+      }
+
+      // Tranzaksiyalarni hisoblaymiz
+      for (let tId in historyData) {
+        const item = historyData[tId];
+        if (item && item.contactId && contactsData[item.contactId]) {
+          if (item.opType === 'purchase' && item.paymentStatus === 'credit') {
+            contactsData[item.contactId].balance += (item.totalAmount || 0);
+          } else if (item.opType === 'payment') {
+            contactsData[item.contactId].balance -= (item.totalAmount || 0);
+          }
+        }
+      }
+
+      for (let cId in contactsData) {
+        grandTotalDebt += contactsData[cId].balance || 0;
+      }
+      document.getElementById('totalDebtSum').innerText = grandTotalDebt.toLocaleString() + " UZS";
+      renderContacts();
+    }
+
+    function renderContacts() {
+      const list = document.getElementById('contactsList');
+      list.innerHTML = '';
+      let count = 0;
+
+      for (let id in contactsData) {
+        count++;
+        const c = contactsData[id];
+        const balance = c.balance || 0;
+        const initDebt = parseFloat(c.initialDebt || 0);
+        
+        const div = document.createElement('div');
+        div.className = "flex justify-between items-center p-2.5 bg-slate-900/60 rounded-xl border border-slate-800/80";
+        div.innerHTML = `
+          <div>
+            <p class="font-bold text-xs text-slate-200">${c.name}</p>
+            <p class="text-[10px] text-slate-400">
+              ${c.type === 'supplier' ? 'Sex (Yuk Beruvchi)' : 'Xaridor'}
+              ${initDebt > 0 ? `<span class="text-amber-400 ml-1">(Eski qarz: ${initDebt.toLocaleString()})</span>` : ''}
+            </p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs font-bold ${balance > 0 ? 'text-red-400' : 'text-emerald-400'}">${balance.toLocaleString()} UZS</p>
+            ${isAdmin ? `
+              <button onclick="editContact('${id}')" class="text-[10px] text-blue-400 underline ml-2">✏️ tahrirlash</button>
+              <button onclick="deleteContact('${id}')" class="text-[10px] text-red-500 underline ml-2">🗑 o'chirish</button>
+            ` : ''}
+          </div>
+        `;
+        list.appendChild(div);
+      }
+      document.getElementById('suppliersCount').innerText = count + " ta";
+    }
+
+    function renderSelectOptions() {
+      const select = document.getElementById('selectedContactId');
+      const currentSelected = select.value;
+      select.innerHTML = '';
+      for (let id in contactsData) {
+        select.innerHTML += `<option value="${id}">${contactsData[id].name}</option>`;
+      }
+      if(currentSelected) select.value = currentSelected;
+    }
+
+    // FORM SAQLASH VA TAHRIRLASH
+    document.getElementById('mainForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (!isAdmin) return alert("Sizda ruxsat yo'q!");
+
+      const contactId = document.getElementById('selectedContactId').value;
+      if(!contactId) return alert("Iltimos, avval sex (hamkor) qo'shing!");
+
+      const recordId = document.getElementById('recordId').value;
+      const now = new Date();
+
+      let recordData = {
+        contactId: contactId,
+        opType: currentOpType,
+        date: recordId ? historyData[recordId].date : now.toLocaleString('uz-UZ'),
+        timestamp: recordId ? historyData[recordId].timestamp : now.getTime()
+      };
+
+      if (currentOpType === 'purchase') {
+        const kg = parseFloat(document.getElementById('weightKg').value) || 0;
+        const price = parseFloat(document.getElementById('pricePerKg').value) || 0;
+        recordData.rollSize = document.getElementById('rollSize').value || '-';
+        recordData.weightKg = kg;
+        recordData.pricePerKg = price;
+        recordData.totalAmount = kg * price;
+        recordData.paymentStatus = document.getElementById('paymentStatus').value;
+      } else {
+        recordData.totalAmount = parseFloat(document.getElementById('paidCashAmount').value) || 0;
+      }
+
+      if (recordId) {
+        db.ref('transactions/' + recordId).update(recordData, () => {
+          resetMainForm();
+          alert("✅ O'zgarishlar saqlandi!");
+        });
+      } else {
+        db.ref('transactions').push(recordData, () => {
+          resetMainForm();
+        });
+      }
     });
+
+    function editRecord(id) {
+      const item = historyData[id];
+      if (!item) return;
+
+      document.getElementById('recordId').value = id;
+      document.getElementById('formTitle').innerText = "✏️ Amaliyotni Tahrirlash";
+      document.getElementById('saveBtn').innerText = "O'zgarishlarni Saqlash";
+      document.getElementById('cancelBtn').classList.remove('hidden');
+
+      document.getElementById('selectedContactId').value = item.contactId;
+      setOpType(item.opType);
+
+      if (item.opType === 'purchase') {
+        document.getElementById('rollSize').value = item.rollSize || '';
+        document.getElementById('weightKg').value = item.weightKg || '';
+        document.getElementById('pricePerKg').value = item.pricePerKg || '';
+        document.getElementById('totalCalculatedPrice').value = item.totalAmount || 0;
+        document.getElementById('paymentStatus').value = item.paymentStatus || 'credit';
+      } else {
+        document.getElementById('paidCashAmount').value = item.totalAmount || '';
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetMainForm() {
+      document.getElementById('mainForm').reset();
+      document.getElementById('recordId').value = '';
+      document.getElementById('formTitle').innerText = "📦 Yangi Operatsiya Kiritish";
+      document.getElementById('saveBtn').innerText = "Saqlash (Sana Avto Yoziladi)";
+      document.getElementById('cancelBtn').classList.add('hidden');
+      setOpType('purchase');
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+      const keys = Object.keys(historyData).reverse();
+
+      keys.forEach(id => {
+        const item = historyData[id];
+        const contactName = contactsData[item.contactId] ? contactsData[item.contactId].name : 'O\'chirilgan';
+        const isPurchase = item.opType === 'purchase';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="py-2 text-slate-400">${item.date ? item.date.split(',')[0] : ''}</td>
+          <td class="py-2 font-bold text-slate-200">${contactName}</td>
+          <td class="py-2">${isPurchase ? `<span class="text-blue-400">${item.rollSize} (${item.weightKg}kg)</span>` : '<span class="text-emerald-400">💸 Naqd Pul</span>'}</td>
+          <td class="py-2 font-bold ${isPurchase ? 'text-red-400' : 'text-emerald-400'}">${(item.totalAmount || 0).toLocaleString()}</td>
+          ${isAdmin ? `
+            <td class="py-2 text-right">
+              <button onclick="editRecord('${id}')" class="text-blue-400 mr-1.5">✏️</button>
+              <button onclick="deleteRecord('${id}')" class="text-red-500">🗑</button>
+            </td>
+          ` : ''}
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function deleteRecord(id) {
+      if (isAdmin && confirm("Ushbu yozuvni o'chirmoqchimisiz?")) db.ref('transactions/' + id).remove();
+    }
+
+    function deleteContact(id) {
+      if (isAdmin && confirm("Hamkorni o'chirmoqchisiz?")) db.ref('contacts/' + id).remove();
+    }
+
+    function toggleContactForm() {
+      document.getElementById('contactFormBox').classList.toggle('hidden');
+    }
+
+    function editContact(id) {
+      const c = contactsData[id];
+      if (!c) return;
+      document.getElementById('editingContactId').value = id;
+      document.getElementById('contactName').value = c.name;
+      document.getElementById('contactType').value = c.type;
+      document.getElementById('initialDebt').value = c.initialDebt || '';
+      document.getElementById('contactSaveBtn').innerText = "Yangilash";
+      document.getElementById('contactCancelBtn').classList.remove('hidden');
+      document.getElementById('contactFormBox').classList.remove('hidden');
+    }
+
+    function cancelContactEdit() {
+      document.getElementById('editingContactId').value = '';
+      document.getElementById('contactName').value = '';
+      document.getElementById('initialDebt').value = '';
+      document.getElementById('contactSaveBtn').innerText = "Saqlash";
+      document.getElementById('contactCancelBtn').classList.add('hidden');
+      toggleContactForm();
+    }
+
+    function saveContact() {
+      const id = document.getElementById('editingContactId').value;
+      const name = document.getElementById('contactName').value.trim();
+      const type = document.getElementById('contactType').value;
+      const initialDebt = parseFloat(document.getElementById('initialDebt').value) || 0;
+
+      if (!name) return alert("Iltimos, ism kiriting!");
+
+      const contactData = { name, type, initialDebt };
+
+      if (id) {
+        db.ref('contacts/' + id).update(contactData, () => {
+          cancelContactEdit();
+        });
+      } else {
+        db.ref('contacts').push(contactData, () => {
+          document.getElementById('contactName').value = '';
+          document.getElementById('initialDebt').value = '';
+          toggleContactForm();
+        });
+      }
+    }
+
+    function copyForExcel() {
+      let text = "Sana\tHamkor\tOperatsiya\tO'lcham/Kg\tSumma\n";
+      for (let id in historyData) {
+        const item = historyData[id];
+        const name = contactsData[item.contactId] ? contactsData[item.contactId].name : '-';
+        text += `${item.date}\t${name}\t${item.opType}\t${item.rollSize || '-'}\t${item.totalAmount}\n`;
+      }
+      navigator.clipboard.writeText(text).then(() => alert("✅ Excel uchun nusxalandi!"));
+    }
+
+    initInterface();
   </script>
 </body>
 </html>
